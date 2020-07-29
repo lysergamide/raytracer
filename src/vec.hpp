@@ -1,4 +1,5 @@
 #pragma once
+
 #include <array>
 #include <cmath>
 #include <type_traits>
@@ -11,7 +12,6 @@ concept Arithmetic = std::is_arithmetic<T>::value;
 /*
  * Vector and associated functions
  */
-
 template <size_t N, typename T>
 using vec = std::array<T, N>;
 
@@ -119,7 +119,6 @@ proj(vec<N, T> v, vec<N, T> u) -> vec<N, T>
 /*
  * Defining shit to make vectors printable
  */
-
 template <>
 struct fmt::formatter<vec3f> {
   // Presentation format: 'f' - fixed, 'e' - exponential.
@@ -166,32 +165,5 @@ struct fmt::formatter<vec3f> {
                      v[0],
                      v[1],
                      v[2]);
-  }
-};
-
-/*
- * Sphere definition
- */
-
-struct sphere {
- private:
-  vec3f center;
-  float radius;
-
- public:
-  sphere(const vec3f &c, float r) : center(c), radius(r) {}
-
-  // https://en.wikipedia.org/wiki/Line-sphere_intersection
-  auto
-  ray_intersection(const vec3f &ray) const -> bool
-  {
-    auto ray_dir = normalize(ray);
-    auto rs      = this->center - ray;
-
-    auto a = dot(ray_dir, ray_dir);
-    auto b = 2 * dot(rs, ray_dir);
-    auto c = dot(rs, rs) - this->radius * this->radius;
-
-    return b * b - 4 * a * c >= 0;
   }
 };
