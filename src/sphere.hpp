@@ -1,12 +1,12 @@
 #pragma once
-#include "./geometry.hpp"
 
-/*
- * Sphere
- */
+#include <optional>
+
+#include "./ray.hpp"
+#include "./vec.hpp"
+#include <fmt/core.h>
 
 struct sphere {
- public:
   vec3f center;
   float radius;
   vec3f color;
@@ -19,17 +19,24 @@ struct sphere {
   {
   }
 
-  // https://en.wikipedia.org/wiki/Line-sphere_intersection
+  /*
+   * https://en.wikipedia.org/wiki/Line-sphere_intersection
+   * returns the distance if we have a hit
+   * otherwise nothing
+   */
+
   auto
-  ray_intersection(const vec3f &ray) const -> bool
+  ray_intersection(const ray &r) const -> std::optional<float>
   {
-    auto ray_dir = normalize(ray);
-    auto rs      = this->center - ray;
+    auto oc = r.origin - this->center;
+    auto a  = dot(r.dir, r.dir);
+    auto b  = 2.0f * dot(oc, r.dir);
+    auto c  = dot(oc, oc) - pow(this->radius, 2);
 
-    auto a = dot(ray_dir, ray_dir);
-    auto b = 2 * dot(rs, ray_dir);
-    auto c = dot(rs, rs) - this->radius * this->radius;
+    auto disc = b * b - 4 * a * c;
 
-    return b * b - 4 * a * c >= 0;
+    if (disc < 0) return {};
+
+    return (-b - sqrtf(disc)) / (2.0f * a);
   }
 };

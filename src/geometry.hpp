@@ -3,3 +3,4 @@
 #include "./vec.hpp"
 #include "./sphere.hpp"
 #include "./lighting.hpp"
+#include "./ray.hpp"
