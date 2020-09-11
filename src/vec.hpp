@@ -19,8 +19,7 @@ using vec3f = vec<3, float>;
 
 // addition
 template <size_t N, typename T>
-auto
-operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
+auto operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 {
   for (size_t i = 0; i < N; i++) a[i] += b[i];
   return a;
@@ -28,8 +27,7 @@ operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 
 // subtraction
 template <size_t N, typename T>
-auto
-operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
+auto operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 {
   for (size_t i = 0; i < N; i++) a[i] -= b[i];
   return a;
@@ -37,8 +35,7 @@ operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 
 // cross product
 template <size_t N, typename T>
-auto
-cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
+auto cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 {
   auto ret = vec<N, T> {};
 
@@ -54,8 +51,7 @@ cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 
 // dot product
 template <size_t N, typename T>
-auto
-dot(const vec<N, T> a, const vec<N, T> b) -> T
+auto dot(const vec<N, T> a, const vec<N, T> b) -> T
 {
   auto ret = T {};
 
@@ -66,31 +62,27 @@ dot(const vec<N, T> a, const vec<N, T> b) -> T
 
 // scalar product
 template <size_t N, typename T, Arithmetic S>
-auto
-operator*(vec<N, T> v, const S c) -> vec<N, T>
+auto operator*(vec<N, T> v, const S c) -> vec<N, T>
 {
   for (size_t i = 0; i < N; i++) v[i] *= c;
   return v;
 }
 
 template <size_t N, typename T, Arithmetic S>
-auto
-operator*(const S c, vec<N, T> v) -> vec<N, T>
+auto operator*(const S c, vec<N, T> v) -> vec<N, T>
 {
   return v * c;
 }
 
 template <size_t N, typename T>
-auto
-operator-(vec<N, T> v) -> vec<N, T>
+auto operator-(vec<N, T> v) -> vec<N, T>
 {
   return v * -1;
 }
 
 // Magnitude
 template <size_t N, typename T>
-auto
-mag(vec<N, T> v) -> float
+auto mag(vec<N, T> v) -> float
 {
   auto ret = 0.0F;
 
@@ -101,23 +93,28 @@ mag(vec<N, T> v) -> float
 
 // Normalize vector, get its directional vector
 template <size_t N, typename T>
-auto
-normalize(vec<N, T> v) -> vec<N, T>
+auto normalize(vec<N, T> v) -> vec<N, T>
 {
   return v * (1.0 / mag(v));
 }
 
 // Projection of v onto u
 template <size_t N, typename T>
-auto
-proj(vec<N, T> v, vec<N, T> u) -> vec<N, T>
+auto proj(vec<N, T> v, vec<N, T> u) -> vec<N, T>
 {
   auto mu = mag(u);
   return (dot(u, v) / (mu * mu)) * u;
 }
 
+// TODO
+template <size_t N, typename T>
+auto reflect(const vec<N, T>& a, const vec<N, T>& b) -> vec<N, T>
+{
+  return a - b * 2.f * dot(a, b);
+}
+
 /*
- * Defining shit to make vectors printable
+ * Taken from fmt docs, makes the vectors printable for debugging
  */
 template <>
 struct fmt::formatter<vec3f> {
@@ -125,8 +122,7 @@ struct fmt::formatter<vec3f> {
   char presentation = 'f';
 
   // Parses format specifications of the form ['f' | 'e'].
-  constexpr auto
-  parse(format_parse_context &ctx)
+  constexpr auto parse(format_parse_context& ctx)
   {
     // auto parse(format_parse_context &ctx) -> decltype(ctx.begin()) // c++11
     // [ctx.begin(), ctx.end()) is a character range that contains a part of
@@ -154,8 +150,7 @@ struct fmt::formatter<vec3f> {
   // Formats the point p using the parsed format specification (presentation)
   // stored in this formatter.
   template <typename FormatContext>
-  auto
-  format(const vec3f &v, FormatContext &ctx)
+  auto format(const vec3f& v, FormatContext& ctx)
   {
     // auto format(const point &p, FormatContext &ctx) -> decltype(ctx.out()) //
     // c++11 ctx.out() is an output iterator to write to.
