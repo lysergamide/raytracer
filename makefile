@@ -7,3 +7,6 @@ ONAME    := 'out'
 
 default: $(SRCDIR)/main.cpp
 	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $(BINDIR)/$(ONAME)
+
+run:
+	./bin/out
