@@ -14,7 +14,7 @@ constexpr auto to_rad(float x) -> float { return (x / 180.f) * M_PI; }
 
 constexpr unsigned width  = 1024;
 constexpr unsigned height = 768;
-constexpr float    fov    = M_PI / 2;  // to_rad(90);
+constexpr float    fov    = to_rad(90);
 
 /*
  * Casts the ray onto objects returning the apropriate color

@@ -4,7 +4,6 @@
 
 #include "./ray.hpp"
 #include "./vec.hpp"
-#include <fmt/core.h>
 
 struct sphere {
   vec3f center;
