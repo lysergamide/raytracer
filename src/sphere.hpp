@@ -2,19 +2,20 @@
 
 #include <optional>
 
+#include "./material.hpp"
 #include "./ray.hpp"
 #include "./vec.hpp"
 
 struct sphere {
-  vec3f center;
-  float radius;
-  vec3f color;
+  vec3f    center;
+  float    radius;
+  material mat;
 
-  sphere(const vec3f c, const float r) : center(c), radius(r), color() {}
-  sphere(const vec3f c, const float r, const vec3f col)
+  sphere(const vec3f c, const float r) : center(c), radius(r), mat() {}
+  sphere(const vec3f c, const float r, const material m)
       : center(c)
       , radius(r)
-      , color(col)
+      , mat(m)
   {
   }
 
@@ -24,8 +25,7 @@ struct sphere {
    * otherwise nothing
    */
 
-  auto
-  ray_intersection(const ray &r) const -> std::optional<float>
+  auto ray_intersection(const ray& r) const -> std::optional<float>
   {
     auto oc = r.origin - this->center;
     auto a  = dot(r.dir, r.dir);
