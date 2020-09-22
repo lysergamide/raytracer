@@ -1,16 +1,21 @@
 #include "./vec.hpp"
 
 struct material {
-    vec3f         color;
-    vec<2, float> brightness;
-    float         specular_exp;
+  vec3f color;     // material colo
+  float idiff;     // diffuse intensity
+  float ispec;     // specular intensity
+  float spec_exp;  // specular exponent
 
-    material() : color(), brightness({ 1, 0 }), specular_exp() {}
+  material() : color(), idiff(), ispec(), spec_exp() {}
 
-    material(const vec3f c, const vec<2, float> b, const float se)
-        : color(c)
-        , brightness(b)
-        , specular_exp(se)
-    {
-    }
+  material(const vec3f& color,
+           const float  idiff,
+           const float  ispec,
+           const float  spec_exp)
+      : color(color)
+      , idiff(idiff)
+      , ispec(ispec)
+      , spec_exp(spec_exp)
+  {
+  }
 };

@@ -80,7 +80,7 @@ auto operator-(vec<N, T> v) -> vec<N, T>
     return v * -1;
 }
 
-// Magnitude
+// Magnitude, also called norm
 template <size_t N, typename T>
 auto mag(vec<N, T> v) -> float
 {
