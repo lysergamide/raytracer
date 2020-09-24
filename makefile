@@ -1,5 +1,5 @@
 CC       := clang++
-CFLAGS   := -Wall -Wextra -pedantic-errors -std=c++20 -O3
+CFLAGS   := -Wall -Wextra -pedantic-errors -std=c++20 -O3 -fopenmp
 LFLAGS   := -lfmt
 SRCDIR   := ./src
 BINDIR   := ./bin

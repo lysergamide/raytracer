@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iterator>
 #include <limits>
+#include <ranges>
 #include <vector>
 
 #include "./geometry.hpp"
@@ -24,7 +25,6 @@ auto cast_ray(const ray&            r,
               const vector<sphere>& spheres,
               const vector<light>&  lights = {}) -> vec3f
 {
-  auto ret  = vec3f { 0.2, 0.7, 0.8 };
   auto dist = numeric_limits<float>::max();
   auto sphr = optional<sphere> {};
 
@@ -38,33 +38,44 @@ auto cast_ray(const ray&            r,
     }
   }
 
+  // default color if no hit
+  if (!sphr) { return { 0.2, 0.7, 0.8 }; }
+
   // phong reflection if theres a hit
-  if (sphr) {
-    auto diff = 0.f;
-    auto spec = 0.f;
+  auto diff = 0.f;
+  auto spec = 0.f;
 
-    const auto& color    = sphr->mat.color;
-    const auto  ispec    = sphr->mat.ispec;
-    const auto  idiff    = sphr->mat.idiff;
-    const auto  spec_exp = sphr->mat.spec_exp;
+  const auto& color    = sphr->mat.color;
+  const auto  ispec    = sphr->mat.ispec;
+  const auto  idiff    = sphr->mat.idiff;
+  const auto  spec_exp = sphr->mat.spec_exp;
 
-    for (const auto& l : lights) {
-      const auto hit        = r.origin + r.dir * dist;
-      const auto normv      = normalize(hit - sphr->center);
-      const auto ldir       = normalize(l.position - hit);
-      const auto reflection = reflect(ldir, normv);
+  for (const auto& l : lights) {
+    const auto hit        = r.origin + r.dir * dist;
+    const auto normv      = normalize(hit - sphr->center);
+    const auto ldir       = normalize(l.position - hit);
+    const auto reflection = reflect(ldir, normv);
 
-      // diffuse lighting
-      diff += l.intensity * max(0.f, dot(ldir, normv));
-
-      // specular lighting
-      spec += powf(max(0.f, dot(reflection, r.dir)), spec_exp) * l.intensity;
+    const auto ldist = mag(l.position - hit);
+    // skip current light if it's blocked by another object
+    if (any_of(begin(spheres), end(spheres), [&](const auto& s) {
+          auto shadow = normalize(hit - normv);
+          return s.ray_intersection(
+                    { l.position, normalize(shadow - l.position) })
+                   .value_or(numeric_limits<float>::max())
+                 < ldist;
+        })) {
+      continue;
     }
 
-    ret = color * (diff * idiff + spec * ispec);
+    // diffuse lighting
+    diff += l.intensity * max(0.f, dot(ldir, normv));
+
+    // specular lighting
+    spec += powf(max(0.f, dot(reflection, r.dir)), spec_exp) * l.intensity;
   }
 
-  return ret;
+  return color * (diff * idiff + spec * ispec);
 }
 
 /*
