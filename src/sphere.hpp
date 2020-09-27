@@ -11,7 +11,13 @@ struct sphere {
   float    radius;
   material mat;
 
-  sphere(const vec3f c, const float r) : center(c), radius(r), mat() {}
+/**
+ * @brief Construct a new sphere object
+ * 
+ * @param c sphere center or orgin
+ * @param r sphere radius
+ * @param m sphere material
+ */
   sphere(const vec3f c, const float r, const material m)
       : center(c)
       , radius(r)
@@ -19,12 +25,13 @@ struct sphere {
   {
   }
 
-  /*
-   * https://en.wikipedia.org/wiki/Line-sphere_intersection
-   * returns the distance if we have a hit
-   * otherwise nothing
+  /**
+   * @brief https://en.wikipedia.org/wiki/Line-sphere_intersection
+   *
+   * @param r ray being checked for interestion
+   * @return std::optional<float> distance between the ray origin and sphere if
+   * we hit
    */
-
   auto ray_intersection(const ray& r) const -> std::optional<float>
   {
     auto oc = r.origin - this->center;

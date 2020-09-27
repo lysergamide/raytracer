@@ -1,5 +1,5 @@
 *.ppm
 *.o
+.vscode
 bin/*
 !bin/.keep
-

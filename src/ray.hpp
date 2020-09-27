@@ -2,10 +2,9 @@
 
 #include "./vec.hpp"
 
+// struct representing a ray
 struct ray {
   vec3f origin;
   vec3f dir;
-
-  ray() {}
-  ray(vec3f o, vec3f d) : origin(o), dir(d) {}
+  ray(vec3f origin, vec3f direction) : origin(origin), dir(direction) {}
 };

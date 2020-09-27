@@ -2,6 +2,7 @@
 
 #include "./vec.hpp"
 
+// struct representing a light
 struct light {
   vec3f position;
   float intensity;

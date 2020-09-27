@@ -15,6 +15,7 @@ concept Arithmetic = std::is_arithmetic<T>::value;
 template <size_t N, typename T>
 using vec = std::array<T, N>;
 
+// a vector of 3 floats
 using vec3f = vec<3, float>;
 
 // addition
@@ -68,19 +69,21 @@ auto operator*(vec<N, T> v, const S c) -> vec<N, T>
     return v;
 }
 
+// scalar product
 template <size_t N, typename T, Arithmetic S>
 auto operator*(const S c, vec<N, T> v) -> vec<N, T>
 {
     return v * c;
 }
 
+// return -v
 template <size_t N, typename T>
 auto operator-(vec<N, T> v) -> vec<N, T>
 {
     return v * -1;
 }
 
-// Magnitude, also called norm
+// Magnitude, also called 'norm'
 template <size_t N, typename T>
 auto mag(vec<N, T> v) -> float
 {

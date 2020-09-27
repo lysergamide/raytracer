@@ -13,14 +13,18 @@ using namespace fmt;
 
 constexpr auto to_rad(float x) -> float { return (x / 180.f) * M_PI; }
 
-constexpr unsigned width  = 1024;
+constexpr unsigned width  = 1366;
 constexpr unsigned height = 768;
 constexpr float    fov    = to_rad(90);
 
-/*
- * Casts the ray onto objects returning the apropriate color
+/**
+ * @brief: Casts a ray onto our scene
+ *
+ * @param r: A ray from the origin to a point on the scene
+ * @param spheres: vector of spheres in the scene
+ * @param lights: vector lights in the scene
+ * @return vec3f represents the color of the point r intersects
  */
-
 auto cast_ray(const ray&            r,
               const vector<sphere>& spheres,
               const vector<light>&  lights = {}) -> vec3f
@@ -39,48 +43,44 @@ auto cast_ray(const ray&            r,
   }
 
   // default color if no hit
-  if (!sphr) { return { 0.2, 0.7, 0.8 }; }
+  if (!sphr) { return vec3f { 0.2, 0.7, 0.8 }; }
 
-  // phong reflection if theres a hit
+  /**
+   * phong reflection if there is a hit
+   */
+
+  const auto& mat   = sphr->mat;
+  const auto  hit   = r.origin + r.dir * dist;  // point on sphere
+  const auto  normv = normalize(hit - sphr->center);
+
   auto diff = 0.f;
   auto spec = 0.f;
 
-  const auto& color    = sphr->mat.color;
-  const auto  ispec    = sphr->mat.ispec;
-  const auto  idiff    = sphr->mat.idiff;
-  const auto  spec_exp = sphr->mat.spec_exp;
-
   for (const auto& l : lights) {
-    const auto hit        = r.origin + r.dir * dist;
-    const auto normv      = normalize(hit - sphr->center);
-    const auto ldir       = normalize(l.position - hit);
-    const auto reflection = reflect(ldir, normv);
+    // direction from hit to light
+    const auto l_dir = normalize(l.position - hit);
+    // direction of reflected light
+    const auto reflection = reflect(l_dir, normv);
+    // distance between hit and light
+    const auto hit_dist = mag(l.position - hit) - 0.001;
+    // ray from light pointing to hit
+    const auto l_ray = ray { l.position, -l_dir };
 
-    const auto ldist = mag(l.position - hit);
+    // helper function, returns true if light is blocked
+    const auto blocks = [&](const sphere& s) -> bool {
+      auto s_dist = s.ray_intersection(l_ray).value_or(
+        numeric_limits<float>::max());
+      return hit_dist > s_dist;
+    };
     // skip current light if it's blocked by another object
-    if (any_of(begin(spheres), end(spheres), [&](const auto& s) {
-          auto shadow = normalize(hit - normv);
-          return s.ray_intersection(
-                    { l.position, normalize(shadow - l.position) })
-                   .value_or(numeric_limits<float>::max())
-                 < ldist;
-        })) {
-      continue;
-    }
+    if (ranges::any_of(spheres, blocks)) { continue; }
 
-    // diffuse lighting
-    diff += l.intensity * max(0.f, dot(ldir, normv));
-
-    // specular lighting
-    spec += powf(max(0.f, dot(reflection, r.dir)), spec_exp) * l.intensity;
+    diff += l.intensity * max(0.f, dot(l_dir, normv));
+    spec += powf(max(0.f, dot(reflection, r.dir)), mat.spec_exp) * l.intensity;
   }
 
-  return color * (diff * idiff + spec * ispec);
+  return mat.color * (diff * mat.idiff + spec * mat.ispec);
 }
-
-/*
- * Render all the objects
- */
 
 auto render(const vector<sphere>& spheres, const vector<light>& lights) -> void
 {
@@ -89,7 +89,7 @@ auto render(const vector<sphere>& spheres, const vector<light>& lights) -> void
 
   const auto ang    = tanf(fov / 2.f);
   const auto origin = vec3f { 0, 0, 0 };
-
+  // sphere's material
   auto buffer = vector<vec3f>(width * height);
 
 #pragma omp parallel for
@@ -104,7 +104,7 @@ auto render(const vector<sphere>& spheres, const vector<light>& lights) -> void
     }
   }
 
-  // trunc overwrites existing file
+  // will overwrites existing file
   auto ofs = ofstream("./out.ppm", ios::trunc);
 
   ofs << fmt::format("P6\n{} {}\n255\n", width, height);
