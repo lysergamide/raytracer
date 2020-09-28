@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./vec.hpp"
-#include "./sphere.hpp"
 #include "./lighting.hpp"
 #include "./ray.hpp"
+#include "./sphere.hpp"
+#include "./vec.hpp"

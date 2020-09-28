@@ -17,10 +17,11 @@ struct material {
    * @param ispec specular intensity
    * @param spec_exp specular exponent
    */
-  material(const vec3f& color,
-           const float  idiff,
-           const float  ispec,
-           const float  spec_exp)
+  material(
+    const vec3f& color,
+    const float  idiff,
+    const float  ispec,
+    const float  spec_exp)
       : color(color)
       , idiff(idiff)
       , ispec(ispec)

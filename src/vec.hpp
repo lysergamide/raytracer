@@ -22,7 +22,9 @@ using vec3f = vec<3, float>;
 template <size_t N, typename T>
 auto operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 {
-    for (size_t i = 0; i < N; i++) a[i] += b[i];
+    for (size_t i = 0; i < N; i++)
+        a[i] += b[i];
+
     return a;
 }
 
@@ -30,7 +32,9 @@ auto operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 template <size_t N, typename T>
 auto operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 {
-    for (size_t i = 0; i < N; i++) a[i] -= b[i];
+    for (size_t i = 0; i < N; i++)
+        a[i] -= b[i];
+
     return a;
 }
 
@@ -38,7 +42,7 @@ auto operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 template <size_t N, typename T>
 auto cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 {
-    auto ret = vec<N, T> {};
+    auto ret = vec<N, T>{};
 
     for (size_t i = 1; i <= N; i++) {
         auto lhs = a[i % N] * b[i + 1 % N];
@@ -54,9 +58,10 @@ auto cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 template <size_t N, typename T>
 auto dot(const vec<N, T> a, const vec<N, T> b) -> T
 {
-    auto ret = T {};
+    auto ret = T{};
 
-    for (size_t i = 0; i < N; i++) ret += a[i] * b[i];
+    for (size_t i = 0; i < N; i++)
+        ret += a[i] * b[i];
 
     return ret;
 }
@@ -65,7 +70,9 @@ auto dot(const vec<N, T> a, const vec<N, T> b) -> T
 template <size_t N, typename T, Arithmetic S>
 auto operator*(vec<N, T> v, const S c) -> vec<N, T>
 {
-    for (size_t i = 0; i < N; i++) v[i] *= c;
+    for (size_t i = 0; i < N; i++)
+        v[i] *= c;
+
     return v;
 }
 
@@ -89,7 +96,8 @@ auto mag(vec<N, T> v) -> float
 {
     auto ret = 0.0F;
 
-    for (size_t i = 0; i < N; i++) ret += v[i] * v[i];
+    for (size_t i = 0; i < N; i++)
+        ret += v[i] * v[i];
 
     return std::sqrt(ret);
 }
@@ -141,10 +149,12 @@ struct fmt::formatter<vec3f> {
 
         // Parse the presentation format and store it in the formatter:
         auto it = ctx.begin(), end = ctx.end();
-        if (it != end && (*it == 'f' || *it == 'e')) presentation = *it++;
+        if (it != end && (*it == 'f' || *it == 'e'))
+            presentation = *it++;
 
         // Check if reached the end of the range:
-        if (it != end && *it != '}') throw format_error("invalid format");
+        if (it != end && *it != '}')
+            throw format_error("invalid format");
 
         // Return an iterator past the end of the parsed range:
         return it;
@@ -158,11 +168,12 @@ struct fmt::formatter<vec3f> {
         // auto format(const point &p, FormatContext &ctx) ->
         // decltype(ctx.out()) // c++11 ctx.out() is an output iterator to write
         // to.
-        return format_to(ctx.out(),
-                         presentation == 'f' ? "<{:.1f}, {:.1f}, {:.1f}>"
-                                             : "<{:.1e}, {:.1e}, {:.1e}>",
-                         v[0],
-                         v[1],
-                         v[2]);
+        return format_to(
+          ctx.out(),
+          presentation == 'f' ? "<{:.1f}, {:.1f}, {:.1f}>"
+                              : "<{:.1e}, {:.1e}, {:.1e}>",
+          v[0],
+          v[1],
+          v[2]);
     }
 };
