@@ -6,21 +6,19 @@
 
 #include <fmt/format.h>
 
-template <typename T>
-concept Arithmetic = std::is_arithmetic<T>::value;
-
 /*
- * Vector and associated functions
+ * math vector and associated functions
  */
+
 template <size_t N, typename T>
 using vec = std::array<T, N>;
 
-// a vector of 3 floats
+// a vec of 3 floats
 using vec3f = vec<3, float>;
 
 // addition
 template <size_t N, typename T>
-auto operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
+auto operator+(vec<N, T> a, const vec<N, T>& b) -> vec<N, T>
 {
     for (size_t i = 0; i < N; i++)
         a[i] += b[i];
@@ -30,7 +28,7 @@ auto operator+(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 
 // subtraction
 template <size_t N, typename T>
-auto operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
+auto operator-(vec<N, T> a, const vec<N, T>& b) -> vec<N, T>
 {
     for (size_t i = 0; i < N; i++)
         a[i] -= b[i];
@@ -40,7 +38,7 @@ auto operator-(vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 
 // cross product
 template <size_t N, typename T>
-auto cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
+auto cross(const vec<N, T>& a, const vec<N, T>& b) -> vec<N, T>
 {
     auto ret = vec<N, T>{};
 
@@ -56,7 +54,7 @@ auto cross(const vec<N, T> a, const vec<N, T> b) -> vec<N, T>
 
 // dot product
 template <size_t N, typename T>
-auto dot(const vec<N, T> a, const vec<N, T> b) -> T
+auto dot(const vec<N, T>& a, const vec<N, T>& b) -> T
 {
     auto ret = T{};
 
@@ -67,7 +65,7 @@ auto dot(const vec<N, T> a, const vec<N, T> b) -> T
 }
 
 // scalar product
-template <size_t N, typename T, Arithmetic S>
+template <size_t N, typename T, typename S>
 auto operator*(vec<N, T> v, const S c) -> vec<N, T>
 {
     for (size_t i = 0; i < N; i++)
@@ -77,22 +75,22 @@ auto operator*(vec<N, T> v, const S c) -> vec<N, T>
 }
 
 // scalar product
-template <size_t N, typename T, Arithmetic S>
-auto operator*(const S c, vec<N, T> v) -> vec<N, T>
+template <size_t N, typename T, typename S>
+auto operator*(const S c, const vec<N, T>& v) -> vec<N, T>
 {
     return v * c;
 }
 
 // return -v
 template <size_t N, typename T>
-auto operator-(vec<N, T> v) -> vec<N, T>
+auto operator-(const vec<N, T>& v) -> vec<N, T>
 {
     return v * -1;
 }
 
 // Magnitude, also called 'norm'
 template <size_t N, typename T>
-auto mag(vec<N, T> v) -> float
+auto magnitude(const vec<N, T>& v) -> float
 {
     auto ret = 0.0F;
 
@@ -104,16 +102,16 @@ auto mag(vec<N, T> v) -> float
 
 // Normalize vector, get its directional vector
 template <size_t N, typename T>
-auto normalize(vec<N, T> v) -> vec<N, T>
+auto normalize(const vec<N, T>& v) -> vec<N, T>
 {
-    return v * (1.0 / mag(v));
+    return v * (1.0 / magnitude(v));
 }
 
 // Projection of v onto u
 template <size_t N, typename T>
-auto proj(vec<N, T> v, vec<N, T> u) -> vec<N, T>
+auto proj(const vec<N, T>& v, const vec<N, T>& u) -> vec<N, T>
 {
-    auto mu = mag(u);
+    auto mu = magnitude(u);
     return (dot(u, v) / (mu * mu)) * u;
 }
 
@@ -125,7 +123,8 @@ auto reflect(const vec<N, T>& a, const vec<N, T>& b) -> vec<N, T>
 }
 
 /*
- * Taken from fmt docs, makes the vectors printable for debugging
+ * Taken from fmt docs
+ * makes the vec3f printable for debugging
  */
 template <>
 struct fmt::formatter<vec3f> {
@@ -149,12 +148,10 @@ struct fmt::formatter<vec3f> {
 
         // Parse the presentation format and store it in the formatter:
         auto it = ctx.begin(), end = ctx.end();
-        if (it != end && (*it == 'f' || *it == 'e'))
-            presentation = *it++;
+        if (it != end && (*it == 'f' || *it == 'e')) presentation = *it++;
 
         // Check if reached the end of the range:
-        if (it != end && *it != '}')
-            throw format_error("invalid format");
+        if (it != end && *it != '}') throw format_error("invalid format");
 
         // Return an iterator past the end of the parsed range:
         return it;
@@ -168,12 +165,11 @@ struct fmt::formatter<vec3f> {
         // auto format(const point &p, FormatContext &ctx) ->
         // decltype(ctx.out()) // c++11 ctx.out() is an output iterator to write
         // to.
-        return format_to(
-          ctx.out(),
-          presentation == 'f' ? "<{:.1f}, {:.1f}, {:.1f}>"
-                              : "<{:.1e}, {:.1e}, {:.1e}>",
-          v[0],
-          v[1],
-          v[2]);
+        return format_to(ctx.out(),
+                         presentation == 'f' ? "<{:.1f}, {:.1f}, {:.1f}>"
+                                             : "<{:.1e}, {:.1e}, {:.1e}>",
+                         v[0],
+                         v[1],
+                         v[2]);
     }
 };

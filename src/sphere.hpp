@@ -43,7 +43,7 @@ struct sphere {
 
         if (disc < 0)
             return {};
-
-        return (-b - sqrtf(disc)) / (2.0f * a);
+        else
+            return (-b - sqrtf(disc)) / (2.0f * a);
     }
 };
