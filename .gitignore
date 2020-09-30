@@ -1,5 +1,6 @@
 *.ppm
 *.o
 .vscode
-bin/*
+build
+bin
 !bin/.keep

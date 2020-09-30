@@ -1,20 +1,22 @@
 #include <algorithm>
 #include <fstream>
+#include <functional>
+#include <iostream>
 #include <limits>
-#include <ranges>
 #include <vector>
 
-#include "./geometry.hpp"
-#include <fmt/core.h>
+#include <geometry.hpp>
+
+#ifndef M_PI
+#    define _USE_MATH_DEFINES
+#    include <math.h>
+#endif
 
 using namespace std;
-using namespace fmt;
-
-// constexpr auto to_rad(float x) -> float { return (x / 180.f) * M_PI; }
 
 constexpr unsigned width  = 1024;
 constexpr unsigned height = 768;
-constexpr float    fov    = M_PI / 2;
+constexpr float    fov    = M_PI / 2;  // 90 degrees
 
 /**
  * @brief: Casts a ray onto our scene
@@ -63,12 +65,15 @@ auto cast_ray(const ray&            r,
      * Mirror like reflection
      */
 
-    const auto re_dir    = reflect(-r.dir, normv);
-    const auto re_origin = dot(re_dir, normv) >= 0 ? hit + normv * 0.0001
-                                                   : hit - normv * 0.0001;
-    const auto re_ray = ray(re_origin, re_dir);
-    const auto reff   = cast_ray(re_ray, spheres, lights, depth + 1)
-                      * sphr->mat.albedo[2];
+    // recursive call
+    using namespace std::placeholders;
+    const auto recast = std::bind(cast_ray, _1, spheres, lights, depth + 1);
+
+    const auto ref_dir    = reflect(-r.dir, normv);
+    const auto ref_origin = dot(ref_dir, normv) >= 0 ? hit + normv * 0.0001
+                                                     : hit - normv * 0.0001;
+    const auto ref_ray   = ray(ref_origin, ref_dir);
+    const auto ref_color = recast(ref_ray) * sphr->mat.albedo[2];
     /**
      * Specular and diffuse lighting
      */
@@ -88,20 +93,20 @@ auto cast_ray(const ray&            r,
 
         // helper function, returns true if light is blocked
         const auto blocks = [&](const sphere& s) -> bool {
-            return abs(hit_dist) > abs(s.ray_intersection(l_ray).value_or(
-                     numeric_limits<float>::max()));
+            return hit_dist > s.ray_intersection(l_ray).value_or(
+                     numeric_limits<float>::max());
         };
         // skip current light if it's blocked by another object
-        if (ranges::any_of(spheres, blocks)) { continue; }
+        if (any_of(begin(spheres), end(spheres), blocks)) { continue; }
 
         diff += l.intensity * max(0.f, dot(l_dir, normv));
         spec += powf(max(0.f, dot(reflection, r.dir)), sphr->mat.spec_exp)
                 * l.intensity;
     }
-    diff *= sphr->mat.albedo[0];
-    spec *= sphr->mat.albedo[1];
+    const auto diff_color = sphr->mat.color * diff * sphr->mat.albedo[0];
+    const auto spec_color = vec3f{ 1, 1, 1 } * spec * sphr->mat.albedo[1];
 
-    return (sphr->mat.color * (diff + spec)) + reff;
+    return diff_color + spec_color + ref_color;
 }
 
 auto render(const vector<sphere>& spheres, const vector<light>& lights) -> void
@@ -128,12 +133,13 @@ auto render(const vector<sphere>& spheres, const vector<light>& lights) -> void
     }
 
     // will overwrite existing file
-    auto ofs = ofstream("./out.ppm", ios::trunc);
+    auto ofs = ofstream("./out.ppm", ios::trunc | ios::binary);
 
-    ofs << fmt::format("P6\n{} {}\n255\n", width, height);
+    ofs << "P6\n" << width << " " << height << "\n255\n";
     for (const auto& vec : buffer)
         for (const auto& val : vec)
-            ofs << static_cast<char>(255 * max(0.0f, min(1.0f, val)));
+            ofs << static_cast<char>(255 * max(0.f, min(1.f, val)));
+    ofs.close();
 }
 
 auto main() -> int
@@ -143,18 +149,17 @@ auto main() -> int
     const auto mirror     = material({ 1, 1, 1 }, { 0.01, 10, 0.9 }, 1425);
     const auto jade       = material({ 0.2, 0.6, 0.5 }, { 0.5, 0.8, .2 }, 100);
 
-    const auto lights = vector<light>{
-        light({ -20, 20, 20 }, 1.5),
-        light({ 30, 50, -25 }, 1.8),
-        light({ 30, 20, 30 }, 1.7),
-    };
-
     const auto spheres = vector<sphere>{
         sphere({ -3, 0, -16 }, 2, ivory),
         sphere({ -1, -1.5, -12 }, 2, mirror),
         sphere({ 1.5, -0.5, -18 }, 3, red_rubber),
         sphere({ 7, 5, -18 }, 4, mirror),
-        //        sphere({ 0, 5, -16 }, 2, jade),
+        sphere({ 0, 5, -16 }, 2, jade),
+    };
+    const auto lights = vector<light>{
+        light({ -20, 20, 20 }, 1.5),
+        light({ 30, 50, -25 }, 1.8),
+        light({ 30, 20, 30 }, 1.7),
     };
 
     render(spheres, lights);
