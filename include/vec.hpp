@@ -111,10 +111,3 @@ auto proj(const vec<N, T>& v, const vec<N, T>& u) -> vec<N, T>
     auto mu = magnitude(u);
     return (dot(u, v) / (mu * mu)) * u;
 }
-
-// Reflect
-template <size_t N, typename T>
-auto reflect(const vec<N, T>& a, const vec<N, T>& b) -> vec<N, T>
-{
-    return a - b * 2.f * dot(a, b);
-}

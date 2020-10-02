@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include "./material.hpp"
-#include "./ray.hpp"
-#include "./vec.hpp"
+#include "material.hpp"
+#include "ray.hpp"
+#include "vec.hpp"
 
 struct sphere {
     vec3f    center;

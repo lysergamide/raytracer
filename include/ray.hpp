@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./vec.hpp"
+#include "vec.hpp"
 
 // struct representing a ray
 struct ray {

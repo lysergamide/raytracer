@@ -7,4 +7,5 @@ include_directories(include)
 add_executable(
   rayTracer
   ./src/main.cpp
-  )
+  ./src/renderer.cpp
+)
